@@ -22,9 +22,12 @@ class ApiHandler(webapp2.RequestHandler):
             else:
                 # fetch
                 logging.info("fetch: " + url)
-                response = urlfetch.fetch(url = url, method = urlfetch.HEAD, follow_redirects = False)
-                final_url = response.headers['location'] if 'location' in response.headers else url
-                memcache.add(url, final_url, time = 86400)
+                response = urlfetch.fetch(url = url, method = urlfetch.HEAD, follow_redirects = False, deadline = 10)
+                if 'location' in response.headers:
+                    final_url = response.headers['location'] 
+                    memcache.add(url, final_url, time = 86400)
+                else:
+                    final_url = url
 
         except urlfetch.Error, error: # urlfetch.Error ???
             logging.warn(error.args)
